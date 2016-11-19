@@ -1,4 +1,4 @@
-﻿//star combo, no r target pick, focus target have q mark, ire chase r, tower range no r, perman show auto q e, flee r cloest target
+﻿//star combo,  focus target have q mark, perman show auto q e
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,7 +36,7 @@ namespace Akali
         {
             if (Player.ChampionName != ChampionName)
                 return;
-            Game.PrintChat("<font color='#f45c09'>[SugoiSeries]</font><font color='#03d8f6'> Quantum Akali </font><font color='#13d450'>Loaded.</font>");
+            Game.PrintChat("<font color='#f45c09'>[SugoiCollection]</font><font color='#03d8f6'> Quantum Akali </font><font color='#13d450'>Loaded.</font>");
 
             Q = new Spell(SpellSlot.Q, 600);
             W = new Spell(SpellSlot.W, 475);
@@ -57,7 +57,7 @@ namespace Akali
                         FontStyle.Bold, SharpDX.Color.Red));*/
             ComboMenu.AddItem(new MenuItem("ComboUseE", "Use E").SetValue(true));
             ComboMenu.AddItem(new MenuItem("ComboUseR", "Use R").SetValue(true));
-            ComboMenu.AddItem(new MenuItem("SmartR", "Use Smart R").SetValue(true));
+            ComboMenu.AddItem(new MenuItem("QaA", "Try AA After Q Marked Target").SetValue(false));
 
             Menu UltimateMenu = Menu.AddSubMenu(new Menu("R Menu", "RMenu"));
             /* //maybe no need
@@ -65,7 +65,7 @@ namespace Akali
                 .SetTooltip("You can set up how many stacks you want to keep In Combo")
                 .SetValue(new Slider(0, 0, 3));*/
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
-                UltimateMenu.SubMenu("NoR").AddItem(new MenuItem("Don't R" + enemy.ChampionName, enemy.ChampionName).SetValue(false).SetTooltip("Turn Off Target Will Not User R On Them, Will KS"));
+                UltimateMenu.SubMenu("R List").AddItem(new MenuItem("UseR" + enemy.ChampionName, "Use R On " + enemy.ChampionName).SetValue(true)).SetTooltip("Turn Off Target Will Not Use R On Them, BUT Will KS");
             UltimateMenu.AddItem(
             new MenuItem("NoTD", "Don't R Under Enemy Tower").SetValue(false));
 
@@ -75,9 +75,9 @@ namespace Akali
             Menu HarassMenu = Menu.AddSubMenu(new Menu("Harass", "Harass"));
             HarassMenu.AddItem(new MenuItem("HarassUseQ", "Use Q").SetValue(true));
             HarassMenu.AddItem(new MenuItem("HarassUseE", "Use E").SetValue(true));
-            HarassMenu.AddItem(new MenuItem("HarassUseStar", "Use Star Harass").SetValue(new KeyBind('G', KeyBindType.Press))).Permashow(true, "Use R+Q+E+R Back");
-            HarassMenu.AddItem(new MenuItem("AutoQ", "Auto Q").SetValue(true).SetValue(new KeyBind('u', KeyBindType.Toggle))).Permashow(true, "Auto Q");
-            HarassMenu.AddItem(new MenuItem("AutoE", "Auto E").SetValue(true).SetValue(new KeyBind('i', KeyBindType.Toggle))).Permashow(true, "Auto E");
+            /*HarassMenu.AddItem(new MenuItem("HarassUseStar", "Use Star Harass").SetValue(new KeyBind('G', KeyBindType.Press))).Permashow(true, "Use R+Q+E+R Back");*/
+            HarassMenu.AddItem(new MenuItem("AutoQ", "Auto Q").SetValue(true).SetValue(new KeyBind('I', KeyBindType.Toggle)));
+            HarassMenu.AddItem(new MenuItem("AutoE", "Auto E").SetValue(true).SetValue(new KeyBind('O', KeyBindType.Toggle)));
 
             Menu LaneCleaMenu = Menu.AddSubMenu(new Menu("Lane Clear", "LaneClear"));
             LaneCleaMenu.AddItem(new MenuItem("LaneClearUseQ", "Use Q").SetValue(true));
@@ -100,7 +100,7 @@ namespace Akali
             MiscMenu.AddItem(new MenuItem("EKillSteal", "E KillSteal?").SetValue(true));
             MiscMenu.AddItem(new MenuItem("RKillSteal", "R KillSteal?").SetValue(false));
             MiscMenu.AddItem(new MenuItem("GapcloseR", "Gapclose R?").SetValue(false));
-            MiscMenu.AddItem(new MenuItem("RCharges", "R Charges").SetValue(new StringList(new[] { "2", "3" })));
+            MiscMenu.AddItem(new MenuItem("RCharges", "R Charges For Gapclose").SetValue(new StringList(new[] { "2", "3" })));
 
             Menu AutoLevelerMenu = Menu.AddSubMenu(new Menu("AutoLeveler Menu", "AutoLevelerMenu"));
             AutoLevelerMenu.AddItem(new MenuItem("AutoLevelUp", "AutoLevel Up Spells?").SetValue(true));
@@ -128,6 +128,8 @@ namespace Akali
             DrawingMenu.AddItem(new MenuItem("DrawW", "Draw W Range").SetValue(false));
             DrawingMenu.AddItem(new MenuItem("DrawE", "Draw E Range").SetValue(false));
             DrawingMenu.AddItem(new MenuItem("DrawR", "Draw R Range").SetValue(false));
+            /*DrawingMenu.AddItem(new MenuItem("DrawAQ", "Draw Auto Q Status").SetValue(true));
+            DrawingMenu.AddItem(new MenuItem("DrawAE", "Draw Auto E Status").SetValue(true));*/
 
             Menu CreditMenu = Menu.AddSubMenu(new Menu("Credits", "Credits"));
             CreditMenu.AddItem(new MenuItem("ME: LOVETAIWAN♥", "ME: LOVETAIWAN♥")).SetTooltip("Learning From Devs Below!").SetFontStyle(
@@ -142,6 +144,8 @@ namespace Akali
                 FontStyle.Bold, SharpDX.Color.LightBlue);
             CreditMenu.AddItem(new MenuItem("Trees", "Trees")).SetFontStyle(
                 FontStyle.Bold, SharpDX.Color.Orange);
+            CreditMenu.AddItem(new MenuItem("Exory", "Exory")).SetFontStyle(
+                FontStyle.Bold, SharpDX.Color.Brown);
             CreditMenu.AddItem(new MenuItem("imop", "Be Sugoi").SetValue(true)).SetFontStyle(
                 FontStyle.Bold, SharpDX.Color.Green);
             if (Menu.Item("imop").GetValue<bool>())
@@ -177,6 +181,7 @@ namespace Akali
             #endregion
 
             Drawing.OnDraw += Drawing_OnDraw;
+            /*Orbwalking.BeforeAttack += beforeAttack;*/
             Obj_AI_Base.OnLevelUp += Obj_AI_Base_OnLevelUp;
             Game.OnUpdate += Game_OnUpdate;
         }//End Game_OnGameLoad + Menu
@@ -277,6 +282,16 @@ namespace Akali
                     Render.Circle.DrawCircle(Player.Position, R.Range, Color.Red);
                 }
             }
+            /*
+            if (Menu.Item("DrawAQ").GetValue<bool>())
+            {
+                Menu.Item("AutoQ").Permashow(true, "Auto Q");
+            }
+
+            if (Menu.Item("DrawAE").GetValue<bool>())
+            {
+                Menu.Item("AutoE").Permashow(true, "Auto E");
+            }*/
         }
         #endregion
 
@@ -381,14 +396,19 @@ namespace Akali
         }
 
         #endregion
+        /*
         private static void NoTD()
         {
             if (Menu.Item("NoTD").GetValue<bool>())
             {
-                var enemy = HeroManager.Enemies.Where(
-                            x => x.IsValidTarget() && !x.UnderTurret() && x.HasBuff("guardianangle"));
+                var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
+
+                if (R.IsReady() && target.IsValidTarget() && target.UnderTurret(true) && !target.HasBuff("guardianangle"))
+                {
+                    return;
+                }
             }
-        }
+        }*/
         private static void AutoQ()
         {
             var autoQ = Menu.Item("AutoQ").GetValue<KeyBind>().Active && Q.IsReady();
@@ -440,11 +460,31 @@ namespace Akali
                 R.CastOnUnit(minion);
             }
         }
+        /*
+        private static void beforeAttack(Orbwalking.BeforeAttackEventArgs args)
+        {
+            var target = Orbwalker.GetTarget() as Obj_AI_Hero;
+            if (target == null)
+                target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            {
+                var QT = HeroManager.Enemies.OrderBy(e => e.Distance(target)).FirstOrDefault(
+                x =>
+                x.ServerPosition.Distance(ObjectManager.Player.ServerPosition) < 125 &&
+                x.HasBuff("Akalimota"));
+                if (Menu.Item("ComboUseQ").GetValue<bool>() && target.IsValidTarget(Q.Range) && Q.CanCast(target) && Q.IsReady())
+                {
+                    Q.Cast(target);
+                }
+                if (Menu.Item("QaA").GetValue<bool>() && QT.IsValidTarget(125))
+                {
+                    Player.IssueOrder(GameObjectOrder.AutoAttack, QT);
+                }
+            }
+        }*/
 
         #region Combo
         private static void Combo()
         {
-
             var target = Orbwalker.GetTarget() as Obj_AI_Hero;
             if (target == null)
                 target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
@@ -453,27 +493,47 @@ namespace Akali
             {
                 GapcloseCombo();
             }
-
             if (target != null && target.IsValidTarget())
             {
-                { 
-                    if (Menu.Item("NoR").GetValue<bool>())
+                /*var enemy = HeroManager.Enemies.OrderBy(e => e.Distance(target)).FirstOrDefault();
+                    if(enemy != null)
                     {
-                        if (Menu.Item("ComboUseR").GetValue<bool>() && target.IsValidTarget(R.Range) && R.CanCast(target) && R.IsReady())
-                        R.Cast(target);
-                    }
-                    if (Menu.Item("ComboUseQ").GetValue<bool>() && target.IsValidTarget(Q.Range) && Q.CanCast(target) && Q.IsReady())
-                        Q.Cast(target);
-                    if (Menu.Item("ComboUseE").GetValue<bool>() && E.IsReady() && target.IsValidTarget(E.Range))
-                        E.Cast(target);
-                    /*
-                    if (Menu.Item("ComboUseW").GetValue<bool>() && target.IsValidTarget(700) && W.IsReady() && R.IsReady())
-                        W.Cast();
-                        */
+                        foreach (var buff in enemy.Buffs)
+                        {
+                            Console.WriteLine(buff.Name);
+                        }
+                    }*/
+                if (Menu.Item("ComboUseQ").GetValue<bool>() && target.IsValidTarget(Q.Range) && Q.CanCast(target) && Q.IsReady())
+                {
+                    Q.Cast(target);
                 }
+
+                if (Menu.Item("ComboUseE").GetValue<bool>() && E.IsReady() && target.IsValidTarget(E.Range))
+                    E.Cast(target);
+
+                if (Menu.Item("ComboUseR").GetValue<bool>() && R.IsReady())
+                {
+                    if (Menu.Item("NoTD").GetValue<bool>() && target.UnderTurret(true))
+                    {
+                        return;
+                    }
+
+                    if (Menu.Item("UseR" + target.ChampionName).GetValue<bool>())
+                    {
+                        if (Menu.Item("ComboUseR").GetValue<bool>() && !target.IsValidTarget(E.Range) && target.IsValidTarget(R.Range) && R.CanCast(target) && R.IsReady())
+                            R.Cast(target);
+                    }
+                }
+
+
+                /*
+                if (Menu.Item("ComboUseW").GetValue<bool>() && target.IsValidTarget(700) && W.IsReady() && R.IsReady())
+                    W.Cast(Game.CursorPos);
+                    */
             }
         }
         #endregion
+
         //My favoriate mundo from H3stia
         private static void LastHit()
         {
@@ -515,6 +575,7 @@ namespace Akali
             var SpellQ = Menu.Item("LaneClearUseQ").GetValue<bool>();
             var SpellE = Menu.Item("LaneClearUseE").GetValue<bool>();
             var Minions = MinionManager.GetMinions(Q.Range, MinionTypes.All, MinionTeam.NotAlly);
+
             if (Minions.Count > 1)
             {
                 foreach (var minion in Minions)
@@ -523,6 +584,7 @@ namespace Akali
                         return;
                     if (SpellQ && Q.IsReady())
                         Q.Cast(minion);
+
                     if (SpellE && E.IsReady() && minion.IsValidTarget(E.Range))
                         E.Cast(minion);
                 }
@@ -564,7 +626,19 @@ namespace Akali
             ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
             var FleeW = Menu.Item("FleeW").GetValue<bool>();
             if (FleeW && W.IsReady())
+            {
                 W.Cast(Game.CursorPos);
+            }
+            //how to only r to minions near game cursopos,maybe working need more test
+            var FleeR = Menu.Item("FleeR").GetValue<bool>();
+            var m = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(R.Range) && !x.IsAlly && R.CanCast(x)).
+                    OrderBy(x => x.Position.Distance(Game.CursorPos)).FirstOrDefault();
+
+            if (m != null && FleeR && R.IsReady())
+            {
+                R.CastOnUnit(m);
+                return;
+            }
         }
 
     }
