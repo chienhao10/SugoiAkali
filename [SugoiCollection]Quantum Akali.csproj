@@ -42,8 +42,15 @@
     <Reference Include="LeagueSharp.Data">
       <HintPath>C:\Users\Administrator\Downloads\Programs\References\LeagueSharp.Data.dll</HintPath>
     </Reference>
+    <Reference Include="SebbyLib">
+      <HintPath>..\..\..\..\..\Downloads\Programs\References\SebbyLib.dll</HintPath>
+    </Reference>
     <Reference Include="SharpDX">
       <HintPath>C:\Users\Administrator\Downloads\Programs\References\SharpDX.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Direct3D9, Version=2.6.3.0, Culture=neutral, PublicKeyToken=345b829e6e492981, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Downloads\Programs\References\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

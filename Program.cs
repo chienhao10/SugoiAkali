@@ -99,7 +99,7 @@ namespace Akali
             MiscMenu.AddItem(new MenuItem("QKillSteal", "Q KillSteal?").SetValue(true));
             MiscMenu.AddItem(new MenuItem("EKillSteal", "E KillSteal?").SetValue(true));
             MiscMenu.AddItem(new MenuItem("RKillSteal", "R KillSteal?").SetValue(false));
-            MiscMenu.AddItem(new MenuItem("GapcloseR", "Gapclose R?").SetValue(false));
+            MiscMenu.AddItem(new MenuItem("GapcloseR", "Gapclose R?").SetValue(false).SetTooltip("Warning: This Does Not Have Turret Check!"));
             MiscMenu.AddItem(new MenuItem("RCharges", "R Charges For Gapclose").SetValue(new StringList(new[] { "2", "3" })));
 
             Menu AutoLevelerMenu = Menu.AddSubMenu(new Menu("AutoLeveler Menu", "AutoLevelerMenu"));
@@ -182,6 +182,7 @@ namespace Akali
 
             Drawing.OnDraw += Drawing_OnDraw;
             /*Orbwalking.BeforeAttack += beforeAttack;*/
+            Orbwalking.AfterAttack += AfterAttack;
             Obj_AI_Base.OnLevelUp += Obj_AI_Base_OnLevelUp;
             Game.OnUpdate += Game_OnUpdate;
         }//End Game_OnGameLoad + Menu
@@ -425,7 +426,7 @@ namespace Akali
             var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
             if (autoE && !Player.UnderTurret())
             {
-                E.Cast(target);
+                E.Cast();
             }
         }
         //ChewyMoon
@@ -481,7 +482,15 @@ namespace Akali
                 }
             }
         }*/
-
+        private static void AfterAttack(AttackableUnit unit, AttackableUnit attackableUnit)
+        {
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed)
+            {
+                Obj_AI_Hero target = TargetSelector.GetTarget(300, TargetSelector.DamageType.Magical);
+                if (Menu.Item("ComboUseE").GetValue<bool>() && E.IsReady())
+                E.Cast();
+            }
+        }
         #region Combo
         private static void Combo()
         {
@@ -489,7 +498,7 @@ namespace Akali
             if (target == null)
                 target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
-            if (target == null && (Menu.Item("GapcloseR").GetValue<bool>()))
+            if (Menu.Item("GapcloseR").GetValue<bool>())
             {
                 GapcloseCombo();
             }
@@ -507,9 +516,6 @@ namespace Akali
                 {
                     Q.Cast(target);
                 }
-
-                if (Menu.Item("ComboUseE").GetValue<bool>() && E.IsReady() && target.IsValidTarget(E.Range))
-                    E.Cast(target);
 
                 if (Menu.Item("ComboUseR").GetValue<bool>() && R.IsReady())
                 {
@@ -566,7 +572,7 @@ namespace Akali
                     Q.Cast(target);
 
                 if (E.IsReady() && SpellE && target.IsValidTarget(E.Range))
-                    E.Cast(target);
+                    E.Cast();
             }
         }
 
@@ -586,7 +592,7 @@ namespace Akali
                         Q.Cast(minion);
 
                     if (SpellE && E.IsReady() && minion.IsValidTarget(E.Range))
-                        E.Cast(minion);
+                        E.Cast();
                 }
             }
         }
@@ -615,7 +621,7 @@ namespace Akali
                 {
                     if (minion.IsValidTarget() && minion.IsValidTarget(E.Range))
                     {
-                        E.Cast(minion);
+                        E.Cast();
                     }
                 }
             }
