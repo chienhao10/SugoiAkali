@@ -1,4 +1,4 @@
-﻿//star combo,  focus target have q mark, perman show auto q e
+﻿//star combo,  focus target have q mark, perman show auto q e + auto ward near wall + r in flee
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -373,7 +373,7 @@ namespace Akali
             if (Q.IsReady() && Menu.Item("QKillSteal").GetValue<bool>())
             {
                 foreach (var target in HeroManager.Enemies.Where(x => x.IsValidTarget(Q.Range) && x.Health < Q.GetDamage(x) && !x.HasBuff("guardianangle") && !x.IsZombie))
-                    if(Q.IsReady())
+                    if (Q.IsReady())
                     {
                         Q.Cast(target);
                     }
@@ -388,7 +388,7 @@ namespace Akali
             }
             if (R.IsReady() && Menu.Item("RKillSteal").GetValue<bool>())
             {
-                foreach (var target in HeroManager.Enemies.Where(x => x.IsValidTarget(R.Range) && x.Health <R.GetDamage(x) && !x.HasBuff("guardianangle") && !x.IsZombie))
+                foreach (var target in HeroManager.Enemies.Where(x => x.IsValidTarget(R.Range) && x.Health < R.GetDamage(x) && !x.HasBuff("guardianangle") && !x.IsZombie))
                     if (R.IsReady())
                     {
                         R.Cast(target);
@@ -414,7 +414,7 @@ namespace Akali
         {
             var autoQ = Menu.Item("AutoQ").GetValue<KeyBind>().Active && Q.IsReady();
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-            if (autoQ && !Player.UnderTurret())
+            if (autoQ && !Player.UnderTurret(true))
             {
                 Q.Cast(target);
             }
@@ -424,7 +424,7 @@ namespace Akali
         {
             var autoE = Menu.Item("AutoE").GetValue<KeyBind>().Active && E.IsReady();
             var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
-            if (autoE && !Player.UnderTurret())
+            if (autoE && target.IsValidTarget(E.Range) && !Player.UnderTurret(true))
             {
                 E.Cast();
             }
@@ -440,7 +440,7 @@ namespace Akali
                 return;
             }
 
-            if(!R.IsReady())
+            if (!R.IsReady())
             {
                 return;
             }
@@ -486,9 +486,8 @@ namespace Akali
         {
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed)
             {
-                Obj_AI_Hero target = TargetSelector.GetTarget(300, TargetSelector.DamageType.Magical);
                 if (Menu.Item("ComboUseE").GetValue<bool>() && E.IsReady())
-                E.Cast();
+                    E.Cast();
             }
         }
         #region Combo
@@ -526,7 +525,7 @@ namespace Akali
 
                     if (Menu.Item("UseR" + target.ChampionName).GetValue<bool>())
                     {
-                        if (Menu.Item("ComboUseR").GetValue<bool>() && !target.IsValidTarget(E.Range) && target.IsValidTarget(R.Range) && R.CanCast(target) && R.IsReady())
+                        if (!target.IsValidTarget(E.Range) && target.IsValidTarget(R.Range) && R.CanCast(target) && R.IsReady())
                             R.Cast(target);
                     }
                 }
@@ -591,6 +590,9 @@ namespace Akali
                     if (SpellQ && Q.IsReady())
                         Q.Cast(minion);
 
+                    if (minion.IsValidTarget(125) && minion.HasBuff("AkaliMota"))
+                        Orbwalker.ForceTarget(minion);
+
                     if (SpellE && E.IsReady() && minion.IsValidTarget(E.Range))
                         E.Cast();
                 }
@@ -613,6 +615,8 @@ namespace Akali
                     {
                         Q.Cast(minion);
                     }
+                    if (minion.IsValidTarget(125) && minion.HasBuff("AkaliMota"))
+                        Orbwalker.ForceTarget(minion);
                 }
             }
             if (Menu.Item("JungleClearUseE").GetValue<bool>() && E.IsReady())
@@ -629,7 +633,7 @@ namespace Akali
 
         private static void Flee()
         {
-            ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+            Orbwalking.MoveTo(Game.CursorPos);
             var FleeW = Menu.Item("FleeW").GetValue<bool>();
             if (FleeW && W.IsReady())
             {
