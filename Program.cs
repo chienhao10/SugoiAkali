@@ -591,7 +591,8 @@ namespace Akali
                         Q.Cast(minion);
 
                     if (minion.IsValidTarget(125) && minion.HasBuff("AkaliMota"))
-                        Orbwalker.ForceTarget(minion);
+                        Orbwalking.MoveTo(minion.ServerPosition);
+                    Orbwalker.ForceTarget(minion);
 
                     if (SpellE && E.IsReady() && minion.IsValidTarget(E.Range))
                         E.Cast();
@@ -614,9 +615,11 @@ namespace Akali
                     if (minion.IsValidTarget())
                     {
                         Q.Cast(minion);
+                        
                     }
                     if (minion.IsValidTarget(125) && minion.HasBuff("AkaliMota"))
-                        Orbwalker.ForceTarget(minion);
+                        Orbwalking.MoveTo(minion.ServerPosition);
+                    Orbwalker.ForceTarget(minion);
                 }
             }
             if (Menu.Item("JungleClearUseE").GetValue<bool>() && E.IsReady())
